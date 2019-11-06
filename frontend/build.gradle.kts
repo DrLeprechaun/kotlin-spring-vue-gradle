@@ -20,7 +20,8 @@ buildscript {
 apply(plugin = "org.siouan.frontend")
 
 frontend {
-    nodeVersion.set("11.8.0")
+    nodeVersion.set("10.16.0")
     cleanScript.set("run clean")
+    installScript.set("install")
     assembleScript.set("run build")
 }

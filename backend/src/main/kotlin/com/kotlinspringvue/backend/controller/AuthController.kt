@@ -105,7 +105,7 @@ class AuthController() {
                     encoder.encode(newUser.password),
                     true
             )
-            user!!.roles = Arrays.asList(roleRepository.findByName("ROLE_USER"))
+            user.roles = Arrays.asList(roleRepository.findByName("ROLE_USER"))
 
             userRepository.save(user)
 

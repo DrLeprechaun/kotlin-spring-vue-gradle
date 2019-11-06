@@ -46,5 +46,6 @@ frontend/node/
 frontend/node_modules/
 frontend/npm-debug.log
 frontend/target
+.gradle
 
 !.mvn/wrapper/maven-wrapper.jar
