@@ -5,6 +5,7 @@ plugins {
     id("io.spring.dependency-management") version "1.0.8.RELEASE"
     kotlin("jvm") version "1.3.50"
     kotlin("plugin.spring") version "1.3.50"
+    id("org.jetbrains.kotlin.plugin.jpa") version "1.3.50"
 }
 
 group = "com.kotlin-spring-vue"
@@ -13,9 +14,13 @@ java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://plugins.gradle.org/m2/")
+    }
 }
 
 dependencies {
+    runtimeOnly(project(":frontend"))
     implementation("org.springframework.boot:spring-boot-starter-actuator:2.1.3.RELEASE")
     implementation("org.springframework.boot:spring-boot-starter-web:2.1.3.RELEASE")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa:2.1.3.RELEASE")
@@ -28,9 +33,10 @@ dependencies {
     implementation("io.jsonwebtoken:jjwt-api:0.10.6")
     implementation("com.mashape.unirest:unirest-java:1.4.9")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.9.8")
-    runtime("org.springframework.boot:spring-boot-devtools:2.1.3.RELEASE")
+    runtimeOnly("org.springframework.boot:spring-boot-devtools:2.1.3.RELEASE")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("org.jetbrains.kotlin:kotlin-noarg:1.3.50")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }

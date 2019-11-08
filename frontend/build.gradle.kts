@@ -1,9 +1,14 @@
 plugins {
     id("org.siouan.frontend") version "1.2.1"
+    id("java")
 }
 
 group = "com.kotlin-spring-vue"
 version = "0.0.1-SNAPSHOT"
+
+java {
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
 
 buildscript {
     repositories {
@@ -12,16 +17,17 @@ buildscript {
             url = uri("https://plugins.gradle.org/m2/")
         }
     }
-    dependencies {
-        classpath("org.siouan:frontend-gradle-plugin:1.2.1")
-    }
 }
-
-apply(plugin = "org.siouan.frontend")
 
 frontend {
     nodeVersion.set("10.16.0")
     cleanScript.set("run clean")
     installScript.set("install")
     assembleScript.set("run build")
+}
+
+tasks.named("jar", Jar::class) {
+    dependsOn("assembleFrontend")
+    from("$buildDir/dist")
+    into("static")
 }
