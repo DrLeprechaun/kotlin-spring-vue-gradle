@@ -4,7 +4,3 @@
  * This is a general purpose Gradle build.
  * Learn how to create Gradle builds at https://guides.gradle.org/creating-new-gradle-builds
  */
-
-tasks.register("stage") {
-    println("BUILDING DEMO APP...")
-}
