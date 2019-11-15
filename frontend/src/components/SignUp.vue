@@ -80,7 +80,7 @@ export default {
             dismissCountDown: 0,
             alertMessage: '',
             successfullyRegistered: false,
-            sitekey: '6LfDWa4UAAAAAG4lOwUUwqadaE0c9mrGRl0HYb5t'
+            sitekey: '6Lc13cIUAAAAAA8pNAiArDrTfjg9zxVkMTCC69kx'
         }
     },
     methods: {

@@ -57,7 +57,7 @@ export default {
           dismissSecs: 5,
           dismissCountDown: 0,
           alertMessage: 'Request error',
-          sitekey: '6LfDWa4UAAAAAG4lOwUUwqadaE0c9mrGRl0HYb5t'
+          sitekey: '6Lc13cIUAAAAAA8pNAiArDrTfjg9zxVkMTCC69kx'
       }
     },
     methods: {
