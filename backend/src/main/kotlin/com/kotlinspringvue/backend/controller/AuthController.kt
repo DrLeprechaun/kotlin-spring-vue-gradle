@@ -4,23 +4,15 @@ import javax.validation.Valid
 import java.util.*
 import java.util.stream.Collectors
 
-import org.springframework.security.core.Authentication
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
-import org.springframework.web.bind.annotation.CrossOrigin
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
 
 import com.kotlinspringvue.backend.model.LoginUser
 import com.kotlinspringvue.backend.model.NewUser
@@ -31,8 +23,11 @@ import com.kotlinspringvue.backend.repository.UserRepository
 import com.kotlinspringvue.backend.repository.RoleRepository
 import com.kotlinspringvue.backend.jwt.JwtProvider
 import com.kotlinspringvue.backend.service.ReCaptchaService
+import org.springframework.web.bind.annotation.*
+import javax.servlet.http.Cookie
+import javax.servlet.http.HttpServletResponse
 
-@CrossOrigin(origins = ["*"], maxAge = 3600)
+@CrossOrigin(origins = ["http://127.0.0.1:8080", "http://127.0.0.1:8081", "https://kotlin-spring-vue-gradle-demo.herokuapp.com"], maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
 class AuthController() {
@@ -56,7 +51,7 @@ class AuthController() {
     lateinit var captchaService: ReCaptchaService
 
     @PostMapping("/signin")
-    fun authenticateUser(@Valid @RequestBody loginRequest: LoginUser): ResponseEntity<*> {
+    fun authenticateUser(@Valid @RequestBody loginRequest: LoginUser/*, response: HttpServletResponse*/): ResponseEntity<*> {
 
         val userCandidate: Optional <User> = userRepository.findByUsername(loginRequest.username!!)
 
@@ -70,6 +65,17 @@ class AuthController() {
                     UsernamePasswordAuthenticationToken(loginRequest.username, loginRequest.password))
             SecurityContextHolder.getContext().setAuthentication(authentication)
             val jwt: String = jwtProvider.generateJwtToken(user.username!!)
+            //setCookie(jwt, response)
+
+            //val cookie: Cookie = Cookie("KSVG_APP_JWT", "aaa")
+            //cookie.maxAge = jwtProvider.jwtExpiration!!
+            //cookie.secure = true
+            //cookie.isHttpOnly = true
+            //cookie.path = "/"
+            //response.addCookie(cookie)
+
+            //var responseCookie: ResponseCookie = ResponseCookie("KSVG_APP_JWT", "valval", Duration(jwtProvider.jwtExpiration!!), );
+
             val authorities: List<GrantedAuthority> = user.roles!!.stream().map({ role -> SimpleGrantedAuthority(role.name)}).collect(Collectors.toList<GrantedAuthority>())
             return ResponseEntity.ok(JwtResponse(jwt, user.username, authorities))
         } else {
@@ -122,6 +128,35 @@ class AuthController() {
 
     private fun usernameExists(username: String): Boolean {
         return userRepository.findByUsername(username).isPresent
+    }
+
+    private fun setCookie(token: String, response: HttpServletResponse) {
+        val cookie: Cookie = Cookie("KSVG_APP_JWT", token)
+        cookie.maxAge = jwtProvider.jwtExpiration!!
+        //cookie.secure = true
+        cookie.isHttpOnly = true
+        response.addCookie(cookie)
+    }
+
+    @GetMapping("/setcookie")
+    fun setCookie(response: HttpServletResponse): String {
+        val cookie: Cookie = Cookie("KSVG_APP", "jwt123_cookie")
+        cookie.maxAge = jwtProvider.jwtExpiration!!
+        //cookie.secure = true
+        cookie.isHttpOnly = true
+        cookie.path = "/"
+        response.addCookie(cookie)
+        return "OK"
+    }
+
+    @GetMapping("/getcookie")
+    fun getCookie(@CookieValue(value = "KSVG_APP") cookieValue: Cookie): String {
+        return cookieValue.value;
+    }
+
+    @GetMapping("/getmycookie")
+    fun getMyCookie(@CookieValue(value = "KSVG_APP_JWT") cookieValue: Cookie): String {
+        return cookieValue.value;
     }
 
 }

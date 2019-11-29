@@ -1,4 +1,7 @@
 module.exports = {
     outputDir: 'build/dist',
-    assetsDir: 'static'
+    assetsDir: 'static',
+    devServer: {
+      port: 8081
+    }
   }
