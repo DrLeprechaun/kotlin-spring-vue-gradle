@@ -64,7 +64,7 @@ export default {
       login() {
         AXIOS.post(`/auth/signin`, {'username': this.$data.username, 'password': this.$data.password})
           .then(response => {
-            this.$store.dispatch('login', {'token': response.data.accessToken, 'roles': response.data.authorities, 'username': response.data.username});
+            this.$store.dispatch('login', {'roles': response.data.authorities, 'username': response.data.username});
             this.$router.push('/home')
           }, error => {
             this.$data.alertMessage = (error.response.data.message.length < 150) ? error.response.data.message : 'Request error. Please, report this error website owners';
@@ -87,7 +87,7 @@ export default {
         onCapthcaVerified(recaptchaToken) {
             AXIOS.post(`/auth/signin`, {'username': this.$data.username, 'password': this.$data.password, 'recapctha_token': recaptchaToken})
             .then(response => {
-              this.$store.dispatch('login', {'token': response.data.accessToken, 'roles': response.data.authorities, 'username': response.data.username});
+              this.$store.dispatch('login', {'roles': response.data.authorities, 'username': response.data.username});
               this.$router.push('/home')
             }, error => {
               this.showAlert(error.response.data.message);

@@ -14,8 +14,7 @@ export default {
     data() {
         return {
             counter: 0,
-            username: '',
-            header: {'Authorization': 'Bearer ' + this.$store.getters.getToken}
+            username: ''
         }
     },
     methods: {

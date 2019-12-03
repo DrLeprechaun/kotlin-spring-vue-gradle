@@ -53,10 +53,12 @@ class WebSecurityConfig : WebSecurityConfigurerAdapter() {
     }
 
     @Throws(Exception::class)
-    override protected fun configure(http: HttpSecurity) {
-        //http.csrf().disable().authorizeRequests()
-        //http.authorizeRequests()
-        http.cors().and().csrf().disable().authorizeRequests()
+    override fun configure(http: HttpSecurity) {
+        //http.cors().and().csrf().disable().authorizeRequests()
+        //http.addFilterBefore(corsFilter(), SessionManagementFilter::class.java)
+                /*.and()*/
+        http
+                .csrf().disable().authorizeRequests()
                 .antMatchers("/**").permitAll()
                 .anyRequest().authenticated()
                 .and()
@@ -64,5 +66,6 @@ class WebSecurityConfig : WebSecurityConfigurerAdapter() {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter::class.java)
+        http.headers().cacheControl().disable()
     }
 }

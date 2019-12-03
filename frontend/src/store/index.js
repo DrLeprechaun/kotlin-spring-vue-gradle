@@ -4,7 +4,6 @@ import Vuex from 'vuex';
 Vue.use(Vuex);
 
 const state = {
-  token: localStorage.getItem('user-token') || '',
   role: localStorage.getItem('user-role') || '',
   username: localStorage.getItem('user-name') || '',
   authorities: localStorage.getItem('authorities') || '',
@@ -12,7 +11,7 @@ const state = {
 
 const getters = {
   isAuthenticated: state => {
-    if (state.token != null && state.token != '') {
+    if (state.role != null && state.role != '') {
       return true;
     } else {
       return false;
@@ -30,18 +29,13 @@ const getters = {
   },
   getAuthorities: state => {
     return state.authorities;
-  },
-  getToken: state => {
-    return state.token;
   }
 };
 
 const mutations = {
   auth_login: (state, user) => {
-    localStorage.setItem('user-token', user.token);
     localStorage.setItem('user-name', user.name);
     localStorage.setItem('user-authorities', user.roles);
-    state.token = user.token;
     state.username = user.username;
     state.authorities = user.roles;
     var isUser = false;
@@ -67,7 +61,6 @@ const mutations = {
     state.role = '';
     state.username = '';
     state.authorities = [];
-    localStorage.removeItem('user-token');
     localStorage.removeItem('user-role');
     localStorage.removeItem('user-name');
     localStorage.removeItem('user-authorities');

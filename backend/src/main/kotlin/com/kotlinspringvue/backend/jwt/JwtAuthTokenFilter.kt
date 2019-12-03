@@ -16,8 +16,12 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter
 
 import com.kotlinspringvue.backend.service.UserDetailsServiceImpl
+import org.springframework.beans.factory.annotation.Value
 
 class JwtAuthTokenFilter : OncePerRequestFilter() {
+
+    @Value("\${ksvg.app.authCookieName}")
+    lateinit var authCookieName: String
 
     @Autowired
     private val tokenProvider: JwtProvider? = null
@@ -48,11 +52,17 @@ class JwtAuthTokenFilter : OncePerRequestFilter() {
     }
 
     private fun getJwt(request: HttpServletRequest): String? {
-        val authHeader = request.getHeader("Authorization")
+        /*val authHeader = request.getHeader("Authorization")
 
         return if (authHeader != null && authHeader.startsWith("Bearer ")) {
             authHeader.replace("Bearer ", "")
-        } else null
+        } else null*/
+        for (cookie in request.cookies) {
+            if (cookie.name == authCookieName) {
+                return cookie.value
+            }
+        }
+        return null
     }
 
     companion object {

@@ -17,13 +17,26 @@
 </template>
 
 <script>
+import {AXIOS} from './components/http-common'
 
 export default {
   name: 'app',
   methods: {
     logout() {
       this.$store.dispatch('logout');
-      this.$router.push('/')
+      this.$router.push('/');
+
+      AXIOS.post(`/auth/logout`)
+          .then(response => {
+            this.$store.dispatch('logout');
+            this.$router.push('/');
+          }, error => {
+            console.log(error)
+            alert("Server error. Please, try later")
+          })
+          .catch(e => {
+            console.log(e);
+          })
     }
   } 
 }

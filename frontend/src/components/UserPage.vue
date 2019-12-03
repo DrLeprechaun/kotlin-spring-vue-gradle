@@ -16,8 +16,7 @@ export default {
     },
     methods: {
         loadUserContent() {
-            const header = {'Authorization': 'Bearer ' + this.$store.getters.getToken};
-            AXIOS.get('/usercontent', { headers: header })
+            AXIOS.get('/usercontent')
             .then(response => {
                 this.$data.pageContent = response.data;
             })

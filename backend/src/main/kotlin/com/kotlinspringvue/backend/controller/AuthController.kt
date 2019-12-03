@@ -16,21 +16,28 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 
 import com.kotlinspringvue.backend.model.LoginUser
 import com.kotlinspringvue.backend.model.NewUser
-import com.kotlinspringvue.backend.web.response.JwtResponse
+import com.kotlinspringvue.backend.web.response.SuccessfulSigninResponse
 import com.kotlinspringvue.backend.web.response.ResponseMessage
 import com.kotlinspringvue.backend.jpa.User
 import com.kotlinspringvue.backend.repository.UserRepository
 import com.kotlinspringvue.backend.repository.RoleRepository
 import com.kotlinspringvue.backend.jwt.JwtProvider
 import com.kotlinspringvue.backend.service.ReCaptchaService
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.bind.annotation.*
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletResponse
 
-@CrossOrigin(origins = ["http://127.0.0.1:8080", "http://127.0.0.1:8081", "https://kotlin-spring-vue-gradle-demo.herokuapp.com"], maxAge = 3600)
+@CrossOrigin(origins = ["http://localhost:8080", "http://localhost:8081", "https://kotlin-spring-vue-gradle-demo.herokuapp.com"], maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
 class AuthController() {
+
+    @Value("\${ksvg.app.authCookieName}")
+    lateinit var authCookieName: String
+
+    @Value("\${ksvg.app.isCookieSecure}")
+    var isCookieSecure: Boolean = true
 
     @Autowired
     lateinit var authenticationManager: AuthenticationManager
@@ -51,7 +58,7 @@ class AuthController() {
     lateinit var captchaService: ReCaptchaService
 
     @PostMapping("/signin")
-    fun authenticateUser(@Valid @RequestBody loginRequest: LoginUser/*, response: HttpServletResponse*/): ResponseEntity<*> {
+    fun authenticateUser(@Valid @RequestBody loginRequest: LoginUser, response: HttpServletResponse): ResponseEntity<*> {
 
         val userCandidate: Optional <User> = userRepository.findByUsername(loginRequest.username!!)
 
@@ -65,19 +72,16 @@ class AuthController() {
                     UsernamePasswordAuthenticationToken(loginRequest.username, loginRequest.password))
             SecurityContextHolder.getContext().setAuthentication(authentication)
             val jwt: String = jwtProvider.generateJwtToken(user.username!!)
-            //setCookie(jwt, response)
 
-            //val cookie: Cookie = Cookie("KSVG_APP_JWT", "aaa")
-            //cookie.maxAge = jwtProvider.jwtExpiration!!
-            //cookie.secure = true
-            //cookie.isHttpOnly = true
-            //cookie.path = "/"
-            //response.addCookie(cookie)
-
-            //var responseCookie: ResponseCookie = ResponseCookie("KSVG_APP_JWT", "valval", Duration(jwtProvider.jwtExpiration!!), );
+            val cookie: Cookie = Cookie(authCookieName, jwt)
+            cookie.maxAge = jwtProvider.jwtExpiration!!
+            cookie.secure = isCookieSecure
+            cookie.isHttpOnly = true
+            cookie.path = "/"
+            response.addCookie(cookie)
 
             val authorities: List<GrantedAuthority> = user.roles!!.stream().map({ role -> SimpleGrantedAuthority(role.name)}).collect(Collectors.toList<GrantedAuthority>())
-            return ResponseEntity.ok(JwtResponse(jwt, user.username, authorities))
+            return ResponseEntity.ok(SuccessfulSigninResponse(user.username, authorities))
         } else {
             return ResponseEntity(ResponseMessage("User not found!"),
                     HttpStatus.BAD_REQUEST)
@@ -122,41 +126,24 @@ class AuthController() {
         }
     }
 
+    @PostMapping("/logout")
+    fun logout(response: HttpServletResponse): ResponseEntity<*> {
+        val cookie: Cookie = Cookie(authCookieName, null)
+        cookie.maxAge = 0
+        cookie.secure = isCookieSecure
+        cookie.isHttpOnly = true
+        cookie.path = "/"
+        response.addCookie(cookie)
+
+        return ResponseEntity.ok(ResponseMessage("Successfully logged"))
+    }
+
     private fun emailExists(email: String): Boolean {
         return userRepository.findByUsername(email).isPresent
     }
 
     private fun usernameExists(username: String): Boolean {
         return userRepository.findByUsername(username).isPresent
-    }
-
-    private fun setCookie(token: String, response: HttpServletResponse) {
-        val cookie: Cookie = Cookie("KSVG_APP_JWT", token)
-        cookie.maxAge = jwtProvider.jwtExpiration!!
-        //cookie.secure = true
-        cookie.isHttpOnly = true
-        response.addCookie(cookie)
-    }
-
-    @GetMapping("/setcookie")
-    fun setCookie(response: HttpServletResponse): String {
-        val cookie: Cookie = Cookie("KSVG_APP", "jwt123_cookie")
-        cookie.maxAge = jwtProvider.jwtExpiration!!
-        //cookie.secure = true
-        cookie.isHttpOnly = true
-        cookie.path = "/"
-        response.addCookie(cookie)
-        return "OK"
-    }
-
-    @GetMapping("/getcookie")
-    fun getCookie(@CookieValue(value = "KSVG_APP") cookieValue: Cookie): String {
-        return cookieValue.value;
-    }
-
-    @GetMapping("/getmycookie")
-    fun getMyCookie(@CookieValue(value = "KSVG_APP_JWT") cookieValue: Cookie): String {
-        return cookieValue.value;
     }
 
 }
