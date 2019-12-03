@@ -34,7 +34,7 @@ const getters = {
 
 const mutations = {
   auth_login: (state, user) => {
-    localStorage.setItem('user-name', user.name);
+    localStorage.setItem('user-name', user.username);
     localStorage.setItem('user-authorities', user.roles);
     state.username = user.username;
     state.authorities = user.roles;
