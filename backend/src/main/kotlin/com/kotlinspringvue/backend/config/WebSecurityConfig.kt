@@ -54,9 +54,6 @@ class WebSecurityConfig : WebSecurityConfigurerAdapter() {
 
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
-        //http.cors().and().csrf().disable().authorizeRequests()
-        //http.addFilterBefore(corsFilter(), SessionManagementFilter::class.java)
-                /*.and()*/
         http
                 .csrf().disable().authorizeRequests()
                 .antMatchers("/**").permitAll()
