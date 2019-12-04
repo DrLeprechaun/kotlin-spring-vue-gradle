@@ -17,7 +17,6 @@ import org.springframework.http.HttpStatus
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = ["http://localhost:8080", "http://localhost:8081", "https://kotlin-spring-vue-gradle-demo.herokuapp.com"], maxAge = 3600)
 class BackendController() {
 
     @Value("\${spring.mail.username}")

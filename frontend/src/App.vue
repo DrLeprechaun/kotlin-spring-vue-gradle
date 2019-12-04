@@ -28,6 +28,7 @@ export default {
 
       AXIOS.post(`/auth/logout`)
           .then(response => {
+            console.log(response.statusText);
             this.$store.dispatch('logout');
             this.$router.push('/');
           }, error => {

@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.*
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletResponse
 
-@CrossOrigin(origins = ["http://localhost:8080", "http://localhost:8081", "https://kotlin-spring-vue-gradle-demo.herokuapp.com"], maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
 class AuthController() {

@@ -16,6 +16,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import com.kotlinspringvue.backend.jwt.JwtAuthEntryPoint
 import com.kotlinspringvue.backend.jwt.JwtAuthTokenFilter
 import com.kotlinspringvue.backend.service.UserDetailsServiceImpl
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import java.util.*
 
 
 @Configuration
@@ -52,9 +56,23 @@ class WebSecurityConfig : WebSecurityConfigurerAdapter() {
         return super.authenticationManagerBean()
     }
 
+    @Bean
+    fun corsConfigurationSource(): CorsConfigurationSource {
+        val configuration = CorsConfiguration()
+        configuration.allowedOrigins = Arrays.asList("http://localhost:8080", "http://localhost:8081", "https://kotlin-spring-vue-gradle-demo.herokuapp.com")
+        configuration.allowedHeaders = Arrays.asList("*")
+        configuration.allowedMethods = Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")
+        configuration.allowCredentials = true
+        configuration.maxAge = 3600
+        val source = UrlBasedCorsConfigurationSource()
+        source.registerCorsConfiguration("/**", configuration)
+        return source
+    }
+
     @Throws(Exception::class)
     override fun configure(http: HttpSecurity) {
         http
+                .cors().and()
                 .csrf().disable().authorizeRequests()
                 .antMatchers("/**").permitAll()
                 .anyRequest().authenticated()
