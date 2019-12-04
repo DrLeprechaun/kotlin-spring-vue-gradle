@@ -52,11 +52,6 @@ class JwtAuthTokenFilter : OncePerRequestFilter() {
     }
 
     private fun getJwt(request: HttpServletRequest): String? {
-        /*val authHeader = request.getHeader("Authorization")
-
-        return if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            authHeader.replace("Bearer ", "")
-        } else null*/
         for (cookie in request.cookies) {
             if (cookie.name == authCookieName) {
                 return cookie.value
