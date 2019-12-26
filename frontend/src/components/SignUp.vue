@@ -19,7 +19,8 @@
             </div>
             <div>
               <b-alert variant="success" :show="successfullyRegistered">
-                You have been successfully registered! Now you can login with your credentials
+                <p>You have been successfully registered!</p> 
+                <p>A confirmation email has been sent. Please, click the link in this email to verify your email.</p>
                 <hr />
                 <router-link to="/login">
                      <b-button variant="primary" class="btn-violet">Login</b-button>

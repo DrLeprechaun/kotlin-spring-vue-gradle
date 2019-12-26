@@ -25,7 +25,7 @@
                  <div class="mt-2"></div>
               </div>
 
-              <b-button v-on:click="validateCaptcha" variant="primary">Login</b-button>
+              <b-button block v-on:click="validateCaptcha" variant="primary">Login</b-button>
 
               <hr class="my-4" />
 
@@ -37,7 +37,7 @@
                     @expired="onCaptchaExpired"
                 />
 
-              <b-button variant="link">Forget password?</b-button>
+              <b-button block variant="link">Forget password?</b-button>
             </b-card>
           </div>
     </div>
@@ -61,25 +61,12 @@ export default {
       }
     },
     methods: {
-      login() {
-        AXIOS.post(`/auth/signin`, {'username': this.$data.username, 'password': this.$data.password})
-          .then(response => {
-            this.$store.dispatch('login', {'roles': response.data.authorities, 'username': response.data.username});
-            this.$router.push('/home')
-          }, error => {
-            this.$data.alertMessage = (error.response.data.message.length < 150) ? error.response.data.message : 'Request error. Please, report this error website owners';
-            console.log(error)
-          })
-          .catch(e => {
-            console.log(e);
-            this.showAlert();
-          })
-      },
       countDownChanged(dismissCountDown) {
           this.dismissCountDown = dismissCountDown
       },
-      showAlert() {
-          this.dismissCountDown = this.dismissSecs
+      showAlert(msg) {
+        this.alertMessage = msg
+        this.dismissCountDown = this.dismissSecs
       },
       validateCaptcha() {
             this.$refs.recaptcha.execute()
@@ -87,9 +74,11 @@ export default {
         onCapthcaVerified(recaptchaToken) {
             AXIOS.post(`/auth/signin`, {'username': this.$data.username, 'password': this.$data.password, 'recapctha_token': recaptchaToken})
             .then(response => {
+              console.log(response);
               this.$store.dispatch('login', {'roles': response.data.authorities, 'username': response.data.username});
               this.$router.push('/home')
             }, error => {
+              console.log(error.response.data.message);
               this.showAlert(error.response.data.message);
             })
             .catch(e => {

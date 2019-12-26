@@ -22,6 +22,11 @@ import {AXIOS} from './components/http-common'
 export default {
   name: 'app',
   methods: {
+    confirmRegistration() {
+      if (this.$route.query.confirmRegistration === 'true' && this.$route.query.token != null) {
+        this.$router.push({name: 'RegistrationConfirmPage', params: { token: this.$route.query.token}});
+      }
+    },
     logout() {
       this.$store.dispatch('logout');
       this.$router.push('/');
@@ -39,6 +44,9 @@ export default {
             console.log(e);
           })
     }
+  },
+  mounted() {
+    this.confirmRegistration();
   } 
 }
 </script>

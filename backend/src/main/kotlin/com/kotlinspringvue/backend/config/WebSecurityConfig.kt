@@ -20,6 +20,7 @@ import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import java.util.*
+import org.springframework.security.config.annotation.web.builders.WebSecurity
 
 
 @Configuration
@@ -28,10 +29,10 @@ import java.util.*
 class WebSecurityConfig : WebSecurityConfigurerAdapter() {
 
     @Autowired
-    internal var userDetailsService: UserDetailsServiceImpl? = null
+    lateinit var userDetailsService: UserDetailsServiceImpl
 
     @Autowired
-    private val unauthorizedHandler: JwtAuthEntryPoint? = null
+    lateinit var unauthorizedHandler: JwtAuthEntryPoint
 
     @Bean
     fun bCryptPasswordEncoder(): BCryptPasswordEncoder {
@@ -82,5 +83,10 @@ class WebSecurityConfig : WebSecurityConfigurerAdapter() {
 
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter::class.java)
         http.headers().cacheControl().disable()
+    }
+
+    @Throws(Exception::class)
+    override fun configure(web: WebSecurity) {
+        web.ignoring().antMatchers("/api/signin", "/api/signup", "/api/registrationConfirm")
     }
 }

@@ -1,8 +1,8 @@
 package com.kotlinspringvue.backend.email
 
-import org.springframework.mail.SimpleMailMessage
+import com.kotlinspringvue.backend.jpa.User
 
-internal interface EmailService {
+interface EmailService {
     fun sendSimpleMessage(to: String,
                           subject: String,
                           text: String)
@@ -20,4 +20,6 @@ internal interface EmailService {
     fun sendHtmlMessage(to: String,
                         subject: String,
                         htmlMsg: String)
+
+    fun sendRegistrationConfirmationEmail(user: User)
 }

@@ -1,5 +1,6 @@
 package com.kotlinspringvue.backend.controller
 
+import com.kotlinspringvue.backend.email.EmailService
 import javax.validation.Valid
 import java.util.*
 import java.util.stream.Collectors
@@ -13,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.ui.Model
 
 import com.kotlinspringvue.backend.model.LoginUser
 import com.kotlinspringvue.backend.model.NewUser
@@ -23,10 +25,18 @@ import com.kotlinspringvue.backend.repository.UserRepository
 import com.kotlinspringvue.backend.repository.RoleRepository
 import com.kotlinspringvue.backend.jwt.JwtProvider
 import com.kotlinspringvue.backend.service.ReCaptchaService
+import com.kotlinspringvue.backend.service.UserDetailsService
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.context.request.WebRequest
+import java.io.UnsupportedEncodingException
 import javax.servlet.http.Cookie
+import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+import com.kotlinspringvue.backend.service.UserDetailsServiceImpl.Companion.TOKEN_VALID
+import com.kotlinspringvue.backend.service.UserDetailsServiceImpl.Companion.TOKEN_INVALID
+import com.kotlinspringvue.backend.service.UserDetailsServiceImpl.Companion.TOKEN_EXPIRED
 
 @RestController
 @RequestMapping("/api/auth")
@@ -56,6 +66,12 @@ class AuthController() {
     @Autowired
     lateinit var captchaService: ReCaptchaService
 
+    @Autowired
+    lateinit var userService: UserDetailsService
+
+    @Autowired
+    lateinit var emailService: EmailService
+
     @PostMapping("/signin")
     fun authenticateUser(@Valid @RequestBody loginRequest: LoginUser, response: HttpServletResponse): ResponseEntity<*> {
 
@@ -67,6 +83,12 @@ class AuthController() {
         }
         else if (userCandidate.isPresent) {
             val user: User = userCandidate.get()
+
+            if (!user.enabled) {
+                return ResponseEntity(ResponseMessage("Account is not verified yet! Please, follow the link in the confirmation email."),
+                        HttpStatus.UNAUTHORIZED)
+            }
+
             val authentication = authenticationManager.authenticate(
                     UsernamePasswordAuthenticationToken(loginRequest.username, loginRequest.password))
             SecurityContextHolder.getContext().setAuthentication(authentication)
@@ -104,25 +126,45 @@ class AuthController() {
                         HttpStatus.BAD_REQUEST)
             }
 
-            // Creating user's account
-            val user = User(
-                    0,
-                    newUser.username!!,
-                    newUser.firstName!!,
-                    newUser.lastName!!,
-                    newUser.email!!,
-                    encoder.encode(newUser.password),
-                    true
-            )
-            user.roles = Arrays.asList(roleRepository.findByName("ROLE_USER"))
+            try {
+                // Creating user's account
+                val user = User(
+                        0,
+                        newUser.username!!,
+                        newUser.firstName!!,
+                        newUser.lastName!!,
+                        newUser.email!!,
+                        encoder.encode(newUser.password),
+                        false
+                )
+                user.roles = Arrays.asList(roleRepository.findByName("ROLE_USER"))
+                val registeredUser = userRepository.save(user)
 
-            userRepository.save(user)
+                emailService.sendRegistrationConfirmationEmail(registeredUser)
+            } catch (e: Exception) {
+                return ResponseEntity(ResponseMessage("Server error. Please, contact site owner"),
+                        HttpStatus.SERVICE_UNAVAILABLE)
+            }
 
-            return ResponseEntity(ResponseMessage("User registered successfully!"), HttpStatus.OK)
+            return ResponseEntity(ResponseMessage("Please, follow the link in the confirmation email to complete the registration."), HttpStatus.OK)
         } else {
             return ResponseEntity(ResponseMessage("User already exists!"),
                     HttpStatus.BAD_REQUEST)
         }
+    }
+
+    @PostMapping("/registrationConfirm")
+    @CrossOrigin(origins = ["*"])
+    @Throws(UnsupportedEncodingException::class)
+    fun confirmRegistration(request: HttpServletRequest, model: Model, @RequestParam("token") token: String): ResponseEntity<*> {
+
+        when(userService.validateVerificationToken(token)) {
+            TOKEN_VALID -> return ResponseEntity.ok(ResponseMessage("Registration confirmed"))
+            TOKEN_INVALID -> return ResponseEntity(ResponseMessage("Token is invalid!"), HttpStatus.BAD_REQUEST)
+            TOKEN_EXPIRED -> return ResponseEntity(ResponseMessage("Token is invalid!"), HttpStatus.UNAUTHORIZED)
+        }
+
+        return ResponseEntity(ResponseMessage("Server error. Please, contact site owner"), HttpStatus.SERVICE_UNAVAILABLE)
     }
 
     @PostMapping("/logout")

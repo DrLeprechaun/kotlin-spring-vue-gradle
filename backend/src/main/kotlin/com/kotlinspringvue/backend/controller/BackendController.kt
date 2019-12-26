@@ -9,7 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.Authentication
 import com.kotlinspringvue.backend.repository.UserRepository
 import com.kotlinspringvue.backend.jpa.User
-import com.kotlinspringvue.backend.email.EmailServiceImpl
+import com.kotlinspringvue.backend.email.EmailService
 import com.kotlinspringvue.backend.web.response.ResponseMessage
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
@@ -29,7 +29,7 @@ class BackendController() {
     lateinit var userRepository: UserRepository
 
     @Autowired
-    lateinit var emailService: EmailServiceImpl
+    lateinit var emailService: EmailService
 
     val counter = AtomicLong()
 

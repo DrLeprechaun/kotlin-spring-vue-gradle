@@ -8,6 +8,7 @@ import SignUp from '@/components/SignUp'
 import AdminPage from '@/components/AdminPage'
 import UserPage from '@/components/UserPage'
 import EmailPage from '@/components/EmailPage'
+import RegistrationConfirmPage from '@/components/RegistrationConfirmPage'
 
 Vue.use(Router)
 
@@ -48,6 +49,11 @@ export default new Router({
         path: '/email',
         name: 'EmailPage',
         component: EmailPage
+      },
+      {
+        path: '/registration-confirm/:token',
+        name: 'RegistrationConfirmPage',
+        component: RegistrationConfirmPage
       }
     ]
 })

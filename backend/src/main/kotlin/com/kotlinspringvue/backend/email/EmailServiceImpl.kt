@@ -1,5 +1,7 @@
 package com.kotlinspringvue.backend.email
 
+import com.kotlinspringvue.backend.jpa.User
+import com.kotlinspringvue.backend.service.UserDetailsServiceImpl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.FileSystemResource
@@ -12,15 +14,20 @@ import org.thymeleaf.spring5.SpringTemplateEngine
 import org.thymeleaf.context.Context
 import java.io.File
 import javax.mail.MessagingException
-import javax.mail.internet.MimeMessage
-import org.apache.commons.io.IOUtils
 import org.springframework.core.env.Environment
+import java.util.*
 
 @Component
 class EmailServiceImpl : EmailService {
 
     @Value("\${spring.mail.username}")
     lateinit var sender: String
+
+    @Value("\${host.url}")
+    lateinit var hostUrl: String
+
+    @Autowired
+    lateinit var userDetailsService: UserDetailsServiceImpl
 
     @Autowired
     lateinit var environment: Environment
@@ -102,5 +109,13 @@ class EmailServiceImpl : EmailService {
         } catch (exception: MailException) {
             exception.printStackTrace()
         }
+    }
+
+    override fun sendRegistrationConfirmationEmail(user: User) {
+        val token = UUID.randomUUID().toString()
+        userDetailsService.createVerificationTokenForUser(token, user)
+        val link = "$hostUrl/?token=$token&confirmRegistration=true"
+        val msg = "<p>Please, follow the link to complete your registration:</p><p><a href=\"$link\">$link</a></p>"
+        user.email?.let{sendHtmlMessage(user.email!!, "KSVG APP: Registration Confirmation", msg)}
     }
 }

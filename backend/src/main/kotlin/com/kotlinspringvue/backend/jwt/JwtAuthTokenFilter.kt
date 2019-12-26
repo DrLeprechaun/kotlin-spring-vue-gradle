@@ -52,10 +52,14 @@ class JwtAuthTokenFilter : OncePerRequestFilter() {
     }
 
     private fun getJwt(request: HttpServletRequest): String? {
-        for (cookie in request.cookies) {
-            if (cookie.name == authCookieName) {
-                return cookie.value
+        try {
+            for (cookie in request.cookies) {
+                if (cookie.name == authCookieName) {
+                    return cookie.value
+                }
             }
+        } catch (e: Exception) {
+            println("No token found!")
         }
         return null
     }
